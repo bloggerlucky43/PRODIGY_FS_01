@@ -17,7 +17,7 @@ export const Register = async (req, res) => {
       return res.status(400).json({ message: "Passwords does not match" });
     }
 
-    const existingUser = await findOne({
+    const existingUser = await User.findOne({
       where: { username: username.trim() },
     });
     if (existingUser) {
@@ -33,7 +33,7 @@ export const Register = async (req, res) => {
       role: "user",
     });
 
-    res.status(201).json({ message: "User has been created" });
+    res.status(200).json({ message: "User has been created" });
   } catch (error) {
     res
       .status(500)
@@ -44,7 +44,9 @@ export const Register = async (req, res) => {
 export const Login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await findOne({ where: { username: username.trim() } });
+    if (!username || !password)
+      return res.status(400).json({ message: "All fields are required" });
+    const user = await User.findOne({ where: { username: username.trim() } });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const isMatch = await bcrypt.compare(password.trim(), user.password);
@@ -55,13 +57,16 @@ export const Login = async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 3600000,
-    });
+    console.log("jst token", token);
 
-    res.json({ message: "Login successful" });
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Lax",
+        maxAge: 24 * 60 * 60 * 1000,
+      })
+      .json({ message: "Login successful", token: token });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import authRoutes from "./routes/authRoutes.js";
+import ProtectedRoute from "./routes/ProtectedRoute.js";
 
 dotenv.config();
 const app = express();
@@ -27,6 +28,7 @@ app.use(cookieParser());
 
 //ROutes
 app.use("/api/auth", authRoutes);
+app.use("/api/protected", ProtectedRoute);
 
 //Sync database
 sequelize.sync().then(() => console.log("Database connected"));

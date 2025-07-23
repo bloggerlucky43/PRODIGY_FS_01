@@ -6,6 +6,7 @@ dotenv.config();
 export const authMiddleware = (req, res, next) => {
   try {
     const token = req.cookies.token;
+    console.log("Cookies from request:", req.cookies);
 
     console.log("The token from middlewareis :", token);
 
